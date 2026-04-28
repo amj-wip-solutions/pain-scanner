@@ -87,7 +87,7 @@ export async function brief(): Promise<void> {
 
   const resend = new Resend(config.resend.apiKey);
   const { error: sendErr } = await resend.emails.send({
-    from: 'PAINRADAR <painradar@resend.dev>',
+    from: config.resend.sender,
     to: config.resend.recipient,
     subject: `PAINRADAR — ${top.length} pains, week of ${new Date().toISOString().slice(0, 10)}`,
     html,

@@ -23,6 +23,7 @@ export const config = {
   resend: {
     apiKey: process.env.RESEND_API_KEY ?? '',
     recipient: process.env.BRIEF_RECIPIENT ?? '',
+    sender: process.env.BRIEF_SENDER ?? 'PAINRADAR <onboarding@resend.dev>',
   },
   supabase: {
     url: process.env.SUPABASE_URL ?? '',
