@@ -1,6 +1,6 @@
-# PAINRADAR Setup
+# PAINRADAR Setup (quickstart)
 
-End-to-end checklist to get a first brief delivered. Local-only Day 1; push to GitHub when you want the cron workflows to run on schedule.
+End-to-end checklist to get a first brief delivered. For per-service detail, troubleshooting, fast-track backfill, tuning and cost monitoring, see [docs/runbook.md](docs/runbook.md).
 
 ## 1. Create the external accounts
 
@@ -84,12 +84,22 @@ CLUSTER_TOOL_OVERLAP_REQUIRED  true
 
 After a successful manual run, the schedules take over: collector every 6 hours, process daily at 02:00 UTC, brief on Sundays at 06:00 UTC.
 
-## 7. First-week sanity checks
+## 7. Fast-track: backfill 90 days
+
+Don't want to wait 4 weeks of organic accumulation? The collector CLI takes a `--lookback=Nd` flag:
+
+```bash
+bun packages/collectors/src/cli.ts reddit --lookback=90d
+```
+
+This bypasses the per-subreddit cursor and pulls everything from the last 90 days, capped at Reddit's hard `/new` pagination limit (~1000 posts per sub). For full math, quota warnings, and resume instructions, see [docs/runbook.md § 8](docs/runbook.md#8-fast-track-backfill-90-days-of-reddit-history).
+
+## 8. First-week sanity checks
 
 - Are most rows getting `is_pain=false`? Tighten `CLASSIFIER_V1_SYSTEM` if too many false positives.
 - Are clusters mostly singletons? Expected for week 1; clustering value compounds with volume.
 - Did a brief send but feel weak? Lower `MIN_SCORE` in `packages/pipeline/src/brief.ts` to surface more, or extend the seed subreddit list in the `source_configs.params.subreddits` jsonb.
 
-## 8. Phase 2 graduation triggers
+## 9. Phase 2 graduation triggers
 
-See `docs/product.md` § Roadmap. Don't graduate a Phase 2 capability before its named trigger fires.
+See `docs/product.md` § Roadmap and `docs/runbook.md § 13`. Don't graduate a Phase 2 capability before its named trigger fires.
