@@ -1,4 +1,9 @@
-import { getSourceConfig, insertRawComplaints, type RawComplaint } from '@painradar/core';
+import {
+  getLastSeenAtForSubreddit,
+  getSourceConfig,
+  insertRawComplaints,
+  type RawComplaint,
+} from '@painradar/core';
 import { collectors } from './index.js';
 
 const name = process.argv[2];
@@ -19,24 +24,51 @@ if (!cfg.enabled) {
   process.exit(0);
 }
 
-const lookbackMs = 6 * 60 * 60 * 1000;
-const since = new Date(Date.now() - lookbackMs);
+const DEFAULT_LOOKBACK_MS = 6 * 60 * 60 * 1000;
+const BACKFILL_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000;
 
-const buffer: RawComplaint[] = [];
 const FLUSH_AT = 50;
-let total = 0;
+let totalAttempted = 0;
 
-async function flush(): Promise<void> {
+async function flush(buffer: RawComplaint[]): Promise<void> {
   if (buffer.length === 0) return;
   const batch = buffer.splice(0, buffer.length);
   const { attempted } = await insertRawComplaints(batch);
-  total += attempted;
+  totalAttempted += attempted;
 }
 
-for await (const row of c.collect({ since, config: cfg.params })) {
-  buffer.push(row);
-  if (buffer.length >= FLUSH_AT) await flush();
-}
-await flush();
+if (name === 'reddit') {
+  const subs = (cfg.params.subreddits as string[]) ?? [];
+  if (subs.length === 0) {
+    console.error('reddit source_configs.params.subreddits is empty');
+    process.exit(1);
+  }
 
-console.log(`${name}: attempted ${total} upserts (duplicates ignored)`);
+  for (const sub of subs) {
+    const lastSeen = await getLastSeenAtForSubreddit(name, sub);
+    const since = lastSeen
+      ? new Date(lastSeen.getTime() - 60 * 60 * 1000)
+      : new Date(Date.now() - BACKFILL_LOOKBACK_MS);
+
+    const buffer: RawComplaint[] = [];
+    for await (const row of c.collect({ since, config: { subreddits: [sub] } })) {
+      buffer.push(row);
+      if (buffer.length >= FLUSH_AT) await flush(buffer);
+    }
+    await flush(buffer);
+
+    console.log(
+      `reddit/${sub}: cursor=${since.toISOString()} cumulative_upserts=${totalAttempted}`,
+    );
+  }
+} else {
+  const since = new Date(Date.now() - DEFAULT_LOOKBACK_MS);
+  const buffer: RawComplaint[] = [];
+  for await (const row of c.collect({ since, config: cfg.params })) {
+    buffer.push(row);
+    if (buffer.length >= FLUSH_AT) await flush(buffer);
+  }
+  await flush(buffer);
+}
+
+console.log(`${name}: total upserts attempted=${totalAttempted} (duplicates ignored)`);

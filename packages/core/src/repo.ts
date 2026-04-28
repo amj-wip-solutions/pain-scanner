@@ -20,6 +20,26 @@ export async function getSourceConfig(source: string): Promise<SourceConfigRow |
   return data as SourceConfigRow | null;
 }
 
+export async function getLastSeenAtForSubreddit(
+  source: string,
+  subreddit: string,
+): Promise<Date | null> {
+  const db = getDb();
+  const { data, error } = await db
+    .from('complaints')
+    .select('created_at')
+    .eq('source', source)
+    .filter('source_signals->>subreddit', 'eq', subreddit)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    throw new Error(`getLastSeenAtForSubreddit(${source}, ${subreddit}): ${error.message}`);
+  }
+  if (!data) return null;
+  return new Date((data as { created_at: string }).created_at);
+}
+
 export async function insertRawComplaints(
   rows: RawComplaint[],
 ): Promise<{ attempted: number }> {
