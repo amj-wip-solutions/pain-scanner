@@ -4,6 +4,7 @@ Automated pipeline that mines public complaints, classifies and scores them, and
 
 ## Documentation
 
+- [Setup walkthrough](SETUP.md) — accounts, local install, first run
 - [Product brief](docs/product.md) — problem, audience, sources, scoring, brief format, roadmap
 - [Technical specification](docs/tech.md) — architecture, data model, pipeline, contracts, deploy
 
