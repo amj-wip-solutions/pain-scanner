@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { config, getDb } from '@painradar/core';
+import { config, getDb, intersectCount, unionLowercase } from '@painradar/core';
 
 const BATCH = 20;
 const PER_REQ_PAUSE_MS = 500;
@@ -22,14 +22,6 @@ type NearestCluster = {
   best_member_confidence: number;
   member_count: number;
 };
-
-function intersectCount(a: string[] | null, b: string[] | null): number {
-  if (!a || !b) return 0;
-  const setB = new Set(b.map((s) => s.toLowerCase()));
-  let n = 0;
-  for (const x of a) if (setB.has(x.toLowerCase())) n += 1;
-  return n;
-}
 
 export async function cluster(): Promise<void> {
   if (!config.gemini.apiKey) throw new Error('GEMINI_API_KEY missing');
@@ -113,9 +105,7 @@ export async function cluster(): Promise<void> {
           const titleUpdate: Record<string, unknown> = {
             member_count: nearest.member_count + 1,
             last_seen: row.created_at,
-            tools_present: Array.from(
-              new Set([...(nearest.tools_present ?? []), ...tools]),
-            ),
+            tools_present: unionLowercase(nearest.tools_present, tools),
           };
           if (conf > nearest.best_member_confidence) {
             titleUpdate.canonical_title = row.pain_phrase;

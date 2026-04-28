@@ -46,7 +46,13 @@ pain-scanner/
 │   │       ├── brief.ts
 │   │       └── adapters/
 │   │           └── reddit.ts     # source-specific signal mapping
-│   └── web/                       # Next.js dashboard
+│   └── web/                       # Next.js 15 dashboard (read-only)
+│       ├── app/
+│       │   ├── layout.tsx
+│       │   ├── page.tsx           # status counts + flagged feed + recent briefs
+│       │   ├── clusters/page.tsx
+│       │   └── clusters/[id]/page.tsx
+│       └── lib/
 ├── supabase/
 │   └── migrations/
 │       └── 0001_init.sql
@@ -442,6 +448,19 @@ cd packages/<pkg> && bun run typecheck
 | Brief | Cluster IDs not present in any prior `briefs.cluster_ids` array |
 
 Failed runs leave rows at last-success status. Next workflow execution picks up from there.
+
+## Tests
+
+`bun test` runs all `*.test.ts` files across the workspace. Day 1 coverage:
+
+| File | What it covers |
+|------|----------------|
+| `packages/core/src/util.test.ts` | `intersectCount` and `unionLowercase` (case-insensitive set ops used by clustering) |
+| `packages/pipeline/src/score.test.ts` | `computeScore` floor, ceiling, breakdown shape, WTP bonus delta, vertical-tuned weight ordering, member-count and uniqueness scaling |
+| `packages/pipeline/src/flag.test.ts` | `tierForScore` for default and custom thresholds at every boundary |
+| `packages/pipeline/src/architecture.test.ts` | Static check: pipeline files outside `adapters/` never import per-source modules. Enforces the source-blind aggregator invariant |
+
+LLM-touching code (`classify.ts`, `cluster.ts`) and HTTP-touching code (`reddit.ts`, `brief.ts`) is not unit-tested Day 1; relies on the typecheck pass and run-time observation against the real services.
 
 ## Observability
 
