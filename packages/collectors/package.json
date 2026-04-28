@@ -1,0 +1,17 @@
+{
+  "name": "@painradar/collectors",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "reddit": "tsx src/cli.ts reddit",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@painradar/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

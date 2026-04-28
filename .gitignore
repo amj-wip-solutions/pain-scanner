@@ -1,0 +1,17 @@
+node_modules/
+.claude/settings.local.json
+.next/
+out/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+.DS_Store
+*.log
+.vercel
+.turbo
+coverage/
+.pnpm-store/
+.supabase/
+*.tsbuildinfo

@@ -1,0 +1,28 @@
+name: process
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @painradar/pipeline run process
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLUSTER_SIMILARITY_THRESHOLD: ${{ vars.CLUSTER_SIMILARITY_THRESHOLD }}
+          CLUSTER_KEYWORD_OVERLAP_MIN: ${{ vars.CLUSTER_KEYWORD_OVERLAP_MIN }}
+          CLUSTER_TOOL_OVERLAP_REQUIRED: ${{ vars.CLUSTER_TOOL_OVERLAP_REQUIRED }}
