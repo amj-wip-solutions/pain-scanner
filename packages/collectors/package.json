@@ -5,13 +5,10 @@
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
-    "reddit": "tsx src/cli.ts reddit",
-    "build": "tsc -p tsconfig.json"
+    "reddit": "bun src/cli.ts reddit",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@painradar/core": "workspace:*"
-  },
-  "devDependencies": {
-    "tsx": "^4.19.0"
   }
 }

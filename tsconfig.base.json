@@ -10,7 +10,7 @@
     "declaration": true,
     "sourceMap": true,
     "lib": ["ES2022"],
-    "types": ["node"]
+    "types": ["bun"]
   },
   "exclude": ["node_modules", "dist"]
 }

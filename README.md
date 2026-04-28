@@ -9,7 +9,7 @@ Automated pipeline that mines public complaints, classifies and scores them, and
 
 ## Stack
 
-TypeScript · Next.js · Supabase + pgvector · GitHub Actions · Gemini 2.0 Flash · Resend · Vercel.
+TypeScript · Bun · Next.js · Supabase + pgvector · GitHub Actions · Gemini 2.0 Flash · Resend · Vercel.
 
 Recurring cost: 0 EUR / month on free tiers at expected volume.
 

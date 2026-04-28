@@ -5,15 +5,18 @@
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
-    "process": "tsx src/cli.ts process",
-    "brief": "tsx src/cli.ts brief",
-    "build": "tsc -p tsconfig.json"
+    "process": "bun src/cli.ts process",
+    "brief": "bun src/cli.ts brief",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@painradar/collectors": "workspace:*",
-    "@painradar/core": "workspace:*"
+    "@painradar/core": "workspace:*",
+    "markdown-it": "^14.1.0",
+    "resend": "^4.0.0"
   },
   "devDependencies": {
-    "tsx": "^4.19.0"
+    "@types/markdown-it": "^14.1.2"
   }
 }

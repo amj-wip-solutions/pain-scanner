@@ -111,6 +111,48 @@ create table briefs (
   html          text not null
 );
 
+-- Cluster lookup: returns nearest cluster to a query embedding with metadata
+-- needed by the cluster stage to apply the tool/keyword overlap guard.
+create or replace function nearest_cluster(query_embedding vector(768))
+returns table (
+  id                     bigint,
+  similarity             double precision,
+  tools_present          text[],
+  best_member_confidence numeric,
+  member_count           int
+)
+language sql
+stable
+as $$
+  select
+    c.id,
+    1 - (c.centroid <=> query_embedding) as similarity,
+    c.tools_present,
+    c.best_member_confidence,
+    c.member_count
+  from clusters c
+  order by c.centroid <=> query_embedding asc
+  limit 1;
+$$;
+
+-- Update centroid as the running average of member embeddings for a cluster.
+create or replace function recompute_cluster_centroid(cluster_id_in bigint)
+returns void
+language sql
+as $$
+  update clusters c
+  set centroid = sub.avg_emb,
+      updated_at = now()
+  from (
+    select cast(avg(comp.embedding) as vector(768)) as avg_emb
+    from complaints comp
+    where comp.cluster_id = cluster_id_in
+      and comp.embedding is not null
+  ) sub
+  where c.id = cluster_id_in
+    and sub.avg_emb is not null;
+$$;
+
 -- Seed: reddit collector for recruiting/TA vertical
 insert into source_configs (source, enabled, params, score_weights) values (
   'reddit',

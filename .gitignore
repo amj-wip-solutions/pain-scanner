@@ -8,6 +8,8 @@ build/
 .env.local
 .env.*.local
 .DS_Store
+.idea/
+.vscode/
 *.log
 .vercel
 .turbo

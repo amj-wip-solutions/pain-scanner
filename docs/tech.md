@@ -5,7 +5,7 @@
 | Layer | Technology |
 |-------|-----------|
 | Language | TypeScript everywhere |
-| Package manager | pnpm workspaces |
+| Runtime + package manager | Bun (workspaces) |
 | Database | Supabase Postgres (free tier) with pgvector |
 | Pipeline runtime | GitHub Actions cron |
 | LLM | Gemini 2.0 Flash (classifier), `text-embedding-004` (clustering) |
@@ -53,7 +53,7 @@ pain-scanner/
 ├── docs/
 │   ├── product.md
 │   └── tech.md
-├── pnpm-workspace.yaml
+├── bun.lock
 └── package.json
 ```
 
@@ -410,18 +410,24 @@ SUPABASE_ANON_KEY              # RLS-protected
 ## Local development
 
 ```bash
-pnpm install
+bun install
 cp .env.example .env.local
-supabase start                       # local Postgres on :54322
-supabase db reset                    # apply migrations
-pnpm --filter @painradar/web dev     # next.js on :3000
-pnpm --filter @painradar/pipeline test
+supabase start                              # local Postgres on :54322
+supabase db reset                           # apply migrations
+bun --filter @painradar/web dev             # next.js on :3000 (when web pkg lands)
+bun --filter @painradar/pipeline test
 ```
 
 Run a collector locally:
 
 ```bash
-pnpm --filter @painradar/collectors run reddit
+bun --filter @painradar/collectors run reddit
+```
+
+Type-check:
+
+```bash
+cd packages/<pkg> && bun run typecheck
 ```
 
 ## Idempotency rules

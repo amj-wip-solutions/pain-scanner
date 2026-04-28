@@ -5,9 +5,10 @@
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@supabase/supabase-js": "^2.45.0"
   }
 }
